@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bos Challenge</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#10142b,#303f91);color:white;min-height:100vh;padding:24px}
+main{max-width:850px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{font-size:36px;margin-top:55px}
+p{line-height:1.6;color:#cbd5f8}
+.panel{background:#ffffff15;border:1px solid #ffffff40;border-radius:25px;padding:25px;margin-top:35px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+button{background:#ffffff25;border:0;border-radius:16px;color:white;padding:20px;text-align:left;font-size:18px;font-weight:bold;cursor:pointer}
+button:hover{background:#ffffff40}
+.option{display:block;width:100%;margin:10px 0}
+#score{background:#ffffff30;padding:15px;border-radius:30px;white-space:nowrap}
+#feedback{font-weight:bold}
+small{color:#cbd5f8}
+@media(max-width:550px){.grid{grid-template-columns:1fr}h1{font-size:29px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<strong>🚀 BOS CHALLENGE</strong>
+<strong id="score">🏆 0 Punkte</strong>
+</header>
+<h1 id="heading">Hey Bo! 👊</h1>
+<p id="intro">5 Fächer. Kurze Challenges. Sammle Punkte und knack dein nächstes Level!</p>
+<section class="panel" id="game"></section>
+</main>
+<script>
+const data={
+"📐 Mathe":[
+["Was bedeutet proportional?",["Beide Größen wachsen im gleichen Verhältnis","Eine Größe bleibt immer gleich","Alles wird kleiner"],0,"Bei proportionalen Zuordnungen bleibt das Verhältnis gleich."],
+["3 Hefte kosten 6 €. Was kosten 5?",["8 €","10 €","12 €"],1,"Ein Heft kostet 2 €. Fünf kosten 10 €."],
+["Wie sieht der Graph einer proportionalen Zuordnung aus?",["Kurve","Gerade durch den Ursprung","Kreis"],1,"Die Gerade geht durch den Punkt (0|0)."],
+["4 kg Äpfel kosten 12 €. Was kostet 1 kg?",["3 €","4 €","6 €"],0,"12 geteilt durch 4 ergibt 3."],
+["Was ist der Proportionalitätsfaktor bei y = 3x?",["1","3","x"],1,"Die Zahl vor x ist der Faktor."]
+],
+"🧬 Biologie":[
+["Was steuert viele Vorgänge in der Zelle?",["Zellkern","Zellwand","Vakuole"],0,"Der Zellkern enthält die Erbinformation."],
+["Was haben Pflanzenzellen zusätzlich?",["Zellwand","Knochen","Nerven"],0,"Die Zellwand gibt Stabilität."],
+["Was macht die Zellmembran?",["Sie kontrolliert den Stoffaustausch","Sie erzeugt Sonnenlicht","Sie ist ein Muskel"],0,"Sie regelt, was hinein- und hinausgelangt."],
+["Wo findet Fotosynthese statt?",["Im Zellkern","In Chloroplasten","In Mitochondrien"],1,"Chloroplasten enthalten Chlorophyll."],
+["Was ist typisch für Pflanzenzellen?",["Große Zentralvakuole","Keine Zellmembran","Immer ein Skelett"],0,"Die Vakuole speichert unter anderem Wasser."]
+],
+"⚡ Physik":[
+["Was kann eine Kraft bewirken?",["Bewegung verändern","Zeit anhalten","Masse verschwinden lassen"],0,"Kräfte können beschleunigen, bremsen oder verformen."],
+["Welche Einheit hat Kraft?",["Kilogramm","Newton","Meter"],1,"Die Krafteinheit heißt Newton (N)."],
+["Was passiert beim Bremsen?",["Geschwindigkeit sinkt","Masse verdoppelt sich","Zeit läuft rückwärts"],0,"Die Bremskraft verändert die Bewegung."],
+["Was zeigt ein Kraftpfeil?",["Richtung und Betrag","Temperatur","Uhrzeit"],0,"Die Pfeillänge steht für den Betrag."],
+["Welche Kraft zieht Dinge zur Erde?",["Magnetkraft","Gewichtskraft","Reibung allein"],1,"Die Gewichtskraft entsteht durch Gravitation."]
+],
+"🇬🇧 Englisch":[
+["Yesterday I ___ football.",["played","have played","playing"],0,"Yesterday zeigt eine abgeschlossene Vergangenheit: Simple Past."],
+["I have ___ my homework.",["do","did","done"],2,"Present Perfect: have + past participle."],
+["She ___ to London last year.",["go","went","has gone"],1,"Last year verlangt hier Simple Past."],
+["Have you ever ___ sushi?",["eat","ate","eaten"],2,"Ever passt oft zum Present Perfect."],
+["We ___ a film yesterday.",["saw","seen","have see"],0,"Die zweite Form von see ist saw."]
+],
+"📚 Deutsch":[
+["Welches Wort ist ein Verb?",["springen","schön","Tisch"],0,"Verben beschreiben Tätigkeiten oder Zustände."],
+["Welches Wort ist ein Adjektiv?",["laufen","schnell","Haus"],1,"Adjektive beschreiben Eigenschaften."],
+["Welches Wort ist ein Nomen?",["Freundschaft","freundlich","freuen"],0,"Nomen werden großgeschrieben."],
+["Was ist die Vorsilbe in 'unfreundlich'?",["freund","lich","un"],2,"Un- steht vor dem Wortstamm."],
+["Welches Wort ist ein Pronomen?",["wir","gehen","grün"],0,"Pronomen können für Nomen stehen."]
+]};
+let points=Number(localStorage.getItem("boPoints")||0);
+let subject="",index=0,answered=false;
+const game=document.getElementById("game");
+function update(){
+document.getElementById("score").textContent="🏆 "+points+" Punkte";
+}
+function home(){
+subject="";
+document.getElementById("heading").textContent="Hey Bo! 👊";
+document.getElementById("intro").textContent="Wähle deine Mission. Jede richtige Antwort bringt 10 Punkte!";
+game.innerHTML="<h2>Wähle deine Mission</h2><div class='grid'>"+
+Object.keys(data).map(s=>"<button data-subject='"+s+"'>"+s+"<br><small>5 Fragen · bis zu 50 Punkte</small></button>").join("")+
+"</div><p>Dein Level: "+(Math.floor(points/100)+1)+"</p>";
+game.querySelectorAll("[data-subject]").forEach(b=>b.onclick=()=>start(b.dataset.subject));
+update();
+}
+function start(s){subject=s;index=0;question();}
+function question(){
+answered=false;
+const q=data[subject][index];
+document.getElementById("heading").textContent=subject;
+document.getElementById("intro").textContent="Frage "+(index+1)+" von 5";
+game.innerHTML="<h2>"+q[0]+"</h2><div id='answers'></div><p id='feedback'></p><div id='next'></div>";
+q[1].forEach((a,i)=>{
+let b=document.createElement("button");
+b.className="option";b.textContent=a;
+b.onclick=()=>answer(i);
+document.getElementById("answers").appendChild(b);
+});
+}
+function answer(i){
+if(answered)return;
+answered=true;
+let q=data[subject][index];
+let correct=i===q[2];
+if(correct){points+=10;localStorage.setItem("boPoints",points);}
+document.getElementById("feedback").textContent=(correct?"✅ Richtig! +10 Punkte. ":"❌ Nicht ganz. ")+q[3];
+document.querySelectorAll(".option").forEach(b=>b.disabled=true);
+let next=document.createElement("button");
+next.textContent=index===4?"🏆 Ergebnis ansehen":"Nächste Frage →";
+next.onclick=()=>{
+index++;
+if(index<5)question();else finish();
+};
+document.getElementById("next").appendChild(next);
+update();
+}
+function finish(){
+document.getElementById("heading").textContent="Mission geschafft! 🏆";
+document.getElementById("intro").textContent="Stark, Bo! Dein aktuelles Level: "+(Math.floor(points/100)+1);
+game.innerHTML="<h2>Bereit für die nächste Challenge?</h2><button id='again'>Zur Fächerauswahl 🚀</button>";
+document.getElementById("again").onclick=home;
+}
+home();
+</script>
+</body>
+</html>
