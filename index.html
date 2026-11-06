@@ -1,129 +1,74 @@
-
 <!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bos Challenge</title>
+<html lang="de"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bos Challenge</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#10142b,#303f91);color:white;min-height:100vh;padding:24px}
-main{max-width:850px;margin:auto}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{font-size:36px;margin-top:55px}
-p{line-height:1.6;color:#cbd5f8}
-.panel{background:#ffffff15;border:1px solid #ffffff40;border-radius:25px;padding:25px;margin-top:35px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-button{background:#ffffff25;border:0;border-radius:16px;color:white;padding:20px;text-align:left;font-size:18px;font-weight:bold;cursor:pointer}
-button:hover{background:#ffffff40}
-.option{display:block;width:100%;margin:10px 0}
-#score{background:#ffffff30;padding:15px;border-radius:30px;white-space:nowrap}
-#feedback{font-weight:bold}
-small{color:#cbd5f8}
-@media(max-width:550px){.grid{grid-template-columns:1fr}h1{font-size:29px}}
-</style>
-</head>
-<body>
-<main>
-<header>
-<strong>🚀 BOS CHALLENGE</strong>
-<strong id="score">🏆 0 Punkte</strong>
-</header>
-<h1 id="heading">Hey Bo! 👊</h1>
-<p id="intro">5 Fächer. Kurze Challenges. Sammle Punkte und knack dein nächstes Level!</p>
-<section class="panel" id="game"></section>
-</main>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#10142b,#303f91);color:white;min-height:100vh;padding:24px}main{max-width:850px;margin:auto}header{display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:36px;margin-top:55px}p{line-height:1.6;color:#cbd5f8}.panel{background:#ffffff15;border:1px solid #ffffff40;border-radius:25px;padding:25px;margin-top:35px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}button{background:#ffffff25;border:0;border-radius:16px;color:white;padding:20px;text-align:left;font-size:18px;font-weight:bold;cursor:pointer}button:hover:not(:disabled){background:#ffffff40}button:disabled{opacity:.7;cursor:default}.option{display:block;width:100%;margin:10px 0}.option.wrong{border:2px solid #ff9d9d}.option.right{border:2px solid #8ef1bd}#score{background:#ffffff30;padding:15px;border-radius:30px;white-space:nowrap}#feedback{font-weight:bold}small{color:#cbd5f8}.muted{color:#cbd5f8}.progress{height:9px;background:#ffffff30;border-radius:20px;overflow:hidden}.progress>div{height:100%;background:#8ef1bd;transition:width .2s}.secondary{background:#ffffff12;border:1px solid #ffffff55}.tip{background:#ffffff16;padding:14px;border-radius:12px}.tag{display:inline-block;padding:7px 12px;background:#ffffff25;border-radius:15px;font-size:14px}@media(max-width:550px){.grid{grid-template-columns:1fr}h1{font-size:29px}button{font-size:16px}}
+</style></head><body><main><header><strong>🚀 BOS CHALLENGE</strong><strong id="score">🏆 0 Punkte</strong></header><h1 id="heading">Hey Bo! 👊</h1><p id="intro"></p><section class="panel" id="game"></section></main>
 <script>
+// Jede Frage: [Frage, Antworten, richtige Antwort (0-2), Erklärung, Tipp]
+const math=[
+["Was bedeutet eine Zuordnung?",["Einem x-Wert wird ein y-Wert zugeordnet","Man zählt immer 2 dazu","x und y sind immer gleich"],0,"Eine Zuordnung verbindet Werte von zwei Größen.","Denk an Gewicht und Preis: Zu jedem Gewicht gehört ein Preis."],
+["Was zeigt eine Wertetabelle?",["Nur die größte Zahl","Zusammengehörige x- und y-Werte","Nur die x-Werte"],1,"Eine Wertetabelle zeigt, welche Werte zusammengehören.","Schau dir zwei Tabellenzeilen mit x und y an."],
+["Welcher Punkt gehört zu x = 2 und y = 4?",["(4|2)","(2|4)","(2|2)"],1,"Im Punkt (x|y) steht x zuerst, y danach.","Erst nach rechts (x), dann nach oben (y)."],
+["Welcher Wert gehört zu x = 3 bei y = 2x?",["5","6","9"],1,"Setze 3 für x ein: y = 2 · 3 = 6.","Rechne 2 mal 3."],
+["Darf bei einer Zuordnung derselbe x-Wert zwei verschiedene y-Werte haben?",["Ja, immer","Nein","Nur bei geraden Zahlen"],1,"Jedem x-Wert wird genau ein y-Wert zugeordnet.","Ein x-Wert soll eindeutig einem y-Wert zugeordnet sein."],
+["1 kg Äpfel kostet 2 €. Was kosten 3 kg?",["5 €","6 €","8 €"],1,"3 · 2 € = 6 €.","Verdreifache den Preis für 1 kg."],
+["Was passiert bei proportionalen Zuordnungen, wenn x verdoppelt wird?",["y wird halbiert","y bleibt gleich","y wird verdoppelt"],2,"Bei einer proportionalen Zuordnung werden beide Werte mit demselben Faktor verändert.","Proportional bedeutet: gleicher Faktor."],
+["Wie sieht der Graph einer proportionalen Zuordnung aus?",["Gerade durch (0|0)","Kreis","Beliebige Kurve"],0,"Der Graph ist eine Gerade durch den Ursprung (0|0).","Bei 0 kg Äpfeln zahlst du 0 € – der Graph beginnt im Ursprung."],
+["3 kg Birnen kosten 6 €. Was kostet 1 kg?",["3 €","2 €","6 €"],1,"6 € : 3 = 2 € pro kg.","Teile den Gesamtpreis durch 3."],
+["Welche Tabelle ist proportional?",["x: 1,2,3 / y: 2,4,6","x: 1,2,3 / y: 2,4,7","x: 1,2,3 / y: 3,3,3"],0,"Hier ist y immer 2 · x.","Prüfe, ob y geteilt durch x immer gleich bleibt."],
+["4 Waffeln kosten 6 €. Wie viel kostet 1 Waffel?",["2 €","1,50 €","1 €"],1,"6 € : 4 = 1,50 €.","Beim Dreisatz zuerst auf 1 Waffel herunterrechnen."],
+["4 Waffeln kosten 6 €. Was kosten 3 Waffeln?",["4,50 €","5 €","3 €"],0,"Eine Waffel kostet 1,50 €. Drei kosten 3 · 1,50 € = 4,50 €.","Rechne erst 6 : 4, dann mal 3."],
+["9 Waffeln kosten 18 €. Was kosten 3?",["9 €","6 €","3 €"],1,"1 Waffel kostet 2 €. Drei kosten 6 €.","Rechne zuerst 18 : 9."],
+["5 Hefte kosten 15 €. Was kosten 8 Hefte?",["20 €","24 €","30 €"],1,"1 Heft kostet 3 €. Acht kosten 24 €.","15 : 5 ergibt den Einzelpreis."],
+["2 Kinokarten kosten 18 €. Was kosten 5?",["36 €","45 €","54 €"],1,"1 Karte kostet 9 €. Fünf kosten 45 €.","Erst durch 2 teilen, dann mit 5 multiplizieren."],
+["6 Arbeiter brauchen 3 Stunden. Wie lange brauchen 3 gleich schnelle Arbeiter für dieselbe Arbeit?",["6 Stunden","1,5 Stunden","3 Stunden"],0,"Halb so viele Arbeiter brauchen doppelt so lange: 6 Stunden.","Weniger Arbeiter = mehr Zeit."],
+["2 Arbeiter brauchen 12 Stunden. Wie lange brauchen 4 gleich schnelle Arbeiter?",["24 Stunden","6 Stunden","12 Stunden"],1,"Doppelt so viele Arbeiter brauchen halb so lange: 6 Stunden.","Verdopple die Arbeiterzahl – was passiert mit der Zeit?"],
+["Was bedeutet antiproportional?",["Mehr x, mehr y im gleichen Verhältnis","Mehr x, weniger y im umgekehrten Verhältnis","x und y sind immer gleich"],1,"Bei antiproportionalen Zuordnungen bleibt das Produkt x · y gleich.","Denke an Arbeiter und Arbeitszeit bei gleicher Arbeit."],
+["1 Arbeiter braucht 18 Stunden. Wie lange brauchen 9 gleich schnelle Arbeiter?",["9 Stunden","2 Stunden","18 Stunden"],1,"18 : 9 = 2 Stunden.","Teile 18 Stunden durch 9."],
+["Welche Tabelle ist antiproportional?",["x: 1,2,3 / y: 12,6,4","x: 1,2,3 / y: 2,4,6","x: 1,2,3 / y: 12,10,8"],0,"Das Produkt x · y ist immer 12.","Multipliziere x mal y in jeder Spalte."],
+["Boss: 6 kg Äpfel kosten 9 €. Was kosten 10 kg?",["12 €","15 €","18 €"],1,"1 kg kostet 1,50 €. 10 kg kosten 15 €.","Rechne 9 : 6 und dann mal 10."],
+["Boss: 4 Arbeiter brauchen 15 Stunden. Wie lange brauchen 10 gleich schnelle Arbeiter?",["6 Stunden","10 Stunden","37,5 Stunden"],0,"4 · 15 = 60 Arbeiterstunden. 60 : 10 = 6 Stunden.","Bei gleicher Arbeit bleibt Arbeiterzahl mal Zeit gleich."],
+["Boss: Welche Zuordnung ist proportional?",["Alter und Körpergröße","Anzahl gleicher Brötchen und Gesamtpreis","Anzahl Arbeiter und Arbeitszeit bei gleicher Arbeit"],1,"Bei festem Stückpreis wächst der Preis proportional zur Anzahl.","Suche eine Zuordnung mit festem Preis pro Stück."],
+["Boss: Bei y = 4x, welcher Punkt liegt auf dem Graphen?",["(3|12)","(3|7)","(4|3)"],0,"Für x = 3 gilt y = 4 · 3 = 12.","Setze x = 3 in die Formel ein."],
+["Boss: 3 Wasserhähne füllen ein Becken in 8 Stunden. Wie lange brauchen 6 gleich starke Wasserhähne?",["16 Stunden","4 Stunden","8 Stunden"],1,"Doppelt so viele Hähne benötigen halb so lange: 4 Stunden.","Das ist antiproportional: doppelte Anzahl, halbe Zeit."]
+];
 const data={
-"📐 Mathe":[
-["Was bedeutet proportional?",["Beide Größen wachsen im gleichen Verhältnis","Eine Größe bleibt immer gleich","Alles wird kleiner"],0,"Bei proportionalen Zuordnungen bleibt das Verhältnis gleich."],
-["3 Hefte kosten 6 €. Was kosten 5?",["8 €","10 €","12 €"],1,"Ein Heft kostet 2 €. Fünf kosten 10 €."],
-["Wie sieht der Graph einer proportionalen Zuordnung aus?",["Kurve","Gerade durch den Ursprung","Kreis"],1,"Die Gerade geht durch den Punkt (0|0)."],
-["4 kg Äpfel kosten 12 €. Was kostet 1 kg?",["3 €","4 €","6 €"],0,"12 geteilt durch 4 ergibt 3."],
-["Was ist der Proportionalitätsfaktor bei y = 3x?",["1","3","x"],1,"Die Zahl vor x ist der Faktor."]
-],
+"📐 Mathe":math,
 "🧬 Biologie":[
 ["Was steuert viele Vorgänge in der Zelle?",["Zellkern","Zellwand","Vakuole"],0,"Der Zellkern enthält die Erbinformation."],
 ["Was haben Pflanzenzellen zusätzlich?",["Zellwand","Knochen","Nerven"],0,"Die Zellwand gibt Stabilität."],
 ["Was macht die Zellmembran?",["Sie kontrolliert den Stoffaustausch","Sie erzeugt Sonnenlicht","Sie ist ein Muskel"],0,"Sie regelt, was hinein- und hinausgelangt."],
 ["Wo findet Fotosynthese statt?",["Im Zellkern","In Chloroplasten","In Mitochondrien"],1,"Chloroplasten enthalten Chlorophyll."],
-["Was ist typisch für Pflanzenzellen?",["Große Zentralvakuole","Keine Zellmembran","Immer ein Skelett"],0,"Die Vakuole speichert unter anderem Wasser."]
-],
+["Was ist typisch für Pflanzenzellen?",["Große Zentralvakuole","Keine Zellmembran","Immer ein Skelett"],0,"Die Vakuole speichert unter anderem Wasser."]],
 "⚡ Physik":[
 ["Was kann eine Kraft bewirken?",["Bewegung verändern","Zeit anhalten","Masse verschwinden lassen"],0,"Kräfte können beschleunigen, bremsen oder verformen."],
 ["Welche Einheit hat Kraft?",["Kilogramm","Newton","Meter"],1,"Die Krafteinheit heißt Newton (N)."],
 ["Was passiert beim Bremsen?",["Geschwindigkeit sinkt","Masse verdoppelt sich","Zeit läuft rückwärts"],0,"Die Bremskraft verändert die Bewegung."],
 ["Was zeigt ein Kraftpfeil?",["Richtung und Betrag","Temperatur","Uhrzeit"],0,"Die Pfeillänge steht für den Betrag."],
-["Welche Kraft zieht Dinge zur Erde?",["Magnetkraft","Gewichtskraft","Reibung allein"],1,"Die Gewichtskraft entsteht durch Gravitation."]
-],
+["Welche Kraft zieht Dinge zur Erde?",["Magnetkraft","Gewichtskraft","Reibung allein"],1,"Die Gewichtskraft entsteht durch Gravitation."]],
 "🇬🇧 Englisch":[
 ["Yesterday I ___ football.",["played","have played","playing"],0,"Yesterday zeigt eine abgeschlossene Vergangenheit: Simple Past."],
 ["I have ___ my homework.",["do","did","done"],2,"Present Perfect: have + past participle."],
 ["She ___ to London last year.",["go","went","has gone"],1,"Last year verlangt hier Simple Past."],
 ["Have you ever ___ sushi?",["eat","ate","eaten"],2,"Ever passt oft zum Present Perfect."],
-["We ___ a film yesterday.",["saw","seen","have see"],0,"Die zweite Form von see ist saw."]
-],
+["We ___ a film yesterday.",["saw","seen","have see"],0,"Die zweite Form von see ist saw."]],
 "📚 Deutsch":[
 ["Welches Wort ist ein Verb?",["springen","schön","Tisch"],0,"Verben beschreiben Tätigkeiten oder Zustände."],
 ["Welches Wort ist ein Adjektiv?",["laufen","schnell","Haus"],1,"Adjektive beschreiben Eigenschaften."],
 ["Welches Wort ist ein Nomen?",["Freundschaft","freundlich","freuen"],0,"Nomen werden großgeschrieben."],
 ["Was ist die Vorsilbe in 'unfreundlich'?",["freund","lich","un"],2,"Un- steht vor dem Wortstamm."],
-["Welches Wort ist ein Pronomen?",["wir","gehen","grün"],0,"Pronomen können für Nomen stehen."]
-]};
-let points=Number(localStorage.getItem("boPoints")||0);
-let subject="",index=0,answered=false;
-const game=document.getElementById("game");
-function update(){
-document.getElementById("score").textContent="🏆 "+points+" Punkte";
-}
-function home(){
-subject="";
-document.getElementById("heading").textContent="Hey Bo! 👊";
-document.getElementById("intro").textContent="Wähle deine Mission. Jede richtige Antwort bringt 10 Punkte!";
-game.innerHTML="<h2>Wähle deine Mission</h2><div class='grid'>"+
-Object.keys(data).map(s=>"<button data-subject='"+s+"'>"+s+"<br><small>5 Fragen · bis zu 50 Punkte</small></button>").join("")+
-"</div><p>Dein Level: "+(Math.floor(points/100)+1)+"</p>";
-game.querySelectorAll("[data-subject]").forEach(b=>b.onclick=()=>start(b.dataset.subject));
-update();
-}
-function start(s){subject=s;index=0;question();}
-function question(){
-answered=false;
-const q=data[subject][index];
-document.getElementById("heading").textContent=subject;
-document.getElementById("intro").textContent="Frage "+(index+1)+" von 5";
-game.innerHTML="<h2>"+q[0]+"</h2><div id='answers'></div><p id='feedback'></p><div id='next'></div>";
-q[1].forEach((a,i)=>{
-let b=document.createElement("button");
-b.className="option";b.textContent=a;
-b.onclick=()=>answer(i);
-document.getElementById("answers").appendChild(b);
-});
-}
-function answer(i){
-if(answered)return;
-answered=true;
-let q=data[subject][index];
-let correct=i===q[2];
-if(correct){points+=10;localStorage.setItem("boPoints",points);}
-document.getElementById("feedback").textContent=(correct?"✅ Richtig! +10 Punkte. ":"❌ Nicht ganz. ")+q[3];
-document.querySelectorAll(".option").forEach(b=>b.disabled=true);
-let next=document.createElement("button");
-next.textContent=index===4?"🏆 Ergebnis ansehen":"Nächste Frage →";
-next.onclick=()=>{
-index++;
-if(index<5)question();else finish();
+["Welches Wort ist ein Pronomen?",["wir","gehen","grün"],0,"Pronomen können für Nomen stehen."]]
 };
-document.getElementById("next").appendChild(next);
-update();
-}
-function finish(){
-document.getElementById("heading").textContent="Mission geschafft! 🏆";
-document.getElementById("intro").textContent="Stark, Bo! Dein aktuelles Level: "+(Math.floor(points/100)+1);
-game.innerHTML="<h2>Bereit für die nächste Challenge?</h2><button id='again'>Zur Fächerauswahl 🚀</button>";
-document.getElementById("again").onclick=home;
-}
+const levels=["Zuordnungen verstehen","Proportionale Zuordnungen","Dreisatz","Antiproportionale Zuordnungen","Boss-Level"];
+let points=Number(localStorage.getItem("boPoints")||0),subject="",index=0,attempts=0,done=false,sessionPoints=0,missed=[],review=false,queue=[];
+const game=document.getElementById("game"),heading=document.getElementById("heading"),intro=document.getElementById("intro");
+function update(){document.getElementById("score").textContent="🏆 "+points+" Punkte"}
+function el(tag,txt,cls){let x=document.createElement(tag);if(txt!==undefined)x.textContent=txt;if(cls)x.className=cls;return x}
+function home(){subject="";heading.textContent="Hey Bo! 👊";intro.textContent="Wähle deine Mission. Sammle Punkte und knack dein nächstes Level!";game.replaceChildren(el("h2","Wähle deine Mission"));let grid=el("div",undefined,"grid");Object.keys(data).forEach(s=>{let b=el("button",s+"\n"+(data[s].length===25?"25 Fragen · bis zu 250 Punkte":"5 Fragen · bis zu 50 Punkte"));b.style.whiteSpace="pre-line";b.onclick=()=>start(s);grid.append(b)});game.append(grid,el("p","Dein Level: "+(Math.floor(points/100)+1)));update()}
+function start(s){subject=s;index=0;attempts=0;sessionPoints=0;missed=[];review=false;queue=data[s].map((_,i)=>i);question()}
+function question(){done=false;attempts=0;let q=data[subject][queue[index]],total=queue.length;heading.textContent=subject;intro.textContent=(review?"Wiederholungsrunde · ":"")+"Frage "+(index+1)+" von "+total;game.replaceChildren();if(subject==="📐 Mathe"&&!review){let label=el("span","Level "+(Math.floor(queue[index]/5)+1)+": "+levels[Math.floor(queue[index]/5)],"tag");game.append(label)}let bar=el("div",undefined,"progress"),fill=el("div");fill.style.width=(index/total*100)+"%";bar.append(fill);game.append(bar,el("h2",q[0]));let answers=el("div");q[1].forEach((a,i)=>{let b=el("button",a,"option");b.onclick=()=>answer(i,b);answers.append(b)});game.append(answers,el("p","","tip"),el("div"));game.lastElementChild.id="next";game.querySelector(".tip").style.display="none"}
+function answer(i,b){if(done||b.disabled)return;let q=data[subject][queue[index]],correct=i===q[2],feedback=game.querySelector(".tip");feedback.style.display="block";if(correct){done=true;let earned=attempts===0?10:5;points+=earned;sessionPoints+=earned;localStorage.setItem("boPoints",String(points));feedback.textContent="✅ Richtig! +"+earned+" Punkte. "+q[3];b.classList.add("right");game.querySelectorAll(".option").forEach(x=>x.disabled=true);showNext()}else{attempts++;b.disabled=true;b.classList.add("wrong");if(attempts===1){feedback.textContent="💡 Tipp: "+(q[4]||"Schau dir die Antwortmöglichkeiten noch einmal genau an.")+" Du hast noch einen Versuch!"}else{done=true;if(!review&&!missed.includes(queue[index]))missed.push(queue[index]);feedback.textContent="📘 Lösung: "+q[1][q[2]]+". "+q[3];game.querySelectorAll(".option").forEach(x=>{x.disabled=true;if(x.textContent===q[1][q[2]])x.classList.add("right")});showNext()}}update()}
+function showNext(){let b=el("button",index===queue.length-1?"🏆 Ergebnis ansehen":"Nächste Frage →");b.onclick=()=>{index++;if(index<queue.length)question();else finish()};document.getElementById("next").append(b)}
+function finish(){heading.textContent=review?"Wiederholung geschafft! 🎯":"Mission geschafft! 🏆";intro.textContent="Dein aktuelles Level: "+(Math.floor(points/100)+1);game.replaceChildren(el("h2","Du hast in dieser Runde "+sessionPoints+" Punkte gesammelt!"));if(!review&&missed.length){game.append(el("p","Bei "+missed.length+" Aufgaben schauen wir noch einmal genauer hin."));let b=el("button","🔁 Schwierige Fragen wiederholen");b.onclick=()=>{review=true;queue=[...missed];index=0;sessionPoints=0;question()};game.append(b)}else{game.append(el("p","Stark gemacht! Du bist bereit für die nächste Mission."))}let homeButton=el("button","Zur Fächerauswahl 🚀","secondary");homeButton.style.marginTop="12px";homeButton.onclick=home;game.append(homeButton)}
 home();
-</script>
-</body>
-</html>
+</script></body></html>
