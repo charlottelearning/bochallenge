@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <title>Foto-Lernchallenge</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #10142b;
+      color: white;
+      text-align: center;
+      padding: 25px;
+    }
+    main { max-width: 480px; margin: auto; }
+    button, input {
+      margin: 12px 0;
+      padding: 15px;
+      font-size: 17px;
+      max-width: 100%;
+    }
+    button {
+      background: #50d6b0;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    img { max-width: 100%; border-radius: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>📸 Foto-Lernchallenge</h1>
+    <p>Fotografiere dein Arbeitsblatt!</p>
+
+    <input type="file" id="foto"
+           accept="image/*" capture="environment">
+
+    <p><img id="vorschau" alt=""></p>
+    <button id="start" disabled>
+      Lernchallenge erstellen
+    </button>
+    <p id="status"></p>
+  </main>
+
+  <script>
+    const foto = document.getElementById("foto");
+    const vorschau = document.getElementById("vorschau");
+    const start = document.getElementById("start");
+    const status = document.getElementById("status");
+
+    foto.addEventListener("change", () => {
+      const datei = foto.files[0];
+      if (!datei) return;
+      vorschau.src = URL.createObjectURL(datei);
+      start.disabled = false;
+      status.textContent = "Foto ausgewählt!";
+    });
+
+    start.addEventListener("click", () => {
+      status.textContent =
+        "Foto bereit! Die KI-Verbindung " +
+        "richten wir im nächsten Schritt ein.";
+    });
+  </script>
+</body>
+</html>
